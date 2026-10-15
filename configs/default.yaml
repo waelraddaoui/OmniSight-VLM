@@ -1,0 +1,38 @@
+# OmniSight-VLM Configuration
+
+system:
+  device: "cuda"          # "cuda" or "cpu"
+  fp16: true              # Use half-precision for acceleration
+  log_level: "INFO"
+
+video:
+  source: "data/synthetic_sample.mp4"
+  target_fps: 30
+  frame_skip: 1
+
+detector:
+  model_id: "yolov8s-worldv2.pt"
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+  vocabulary:
+    - "worker"
+    - "cart"
+
+tracker:
+  track_activation_threshold: 0.25
+  lost_track_buffer: 30
+  minimum_matching_threshold: 0.8
+  frame_rate: 30
+
+analytics:
+  dwell_time_threshold_sec: 2.0 # 2 seconds dwell triggers LOITERING alert
+  zones:
+    - name: "Restricted Robotics Bay"
+      polygon: [[180, 140], [460, 140], [460, 360], [180, 360]]
+      color: [0, 0, 255]
+      target_classes: ["worker", "person"]
+
+reasoning:
+  vlm_model_id: "Qwen/Qwen2-VL-2B-Instruct"
+  quantization: "4bit"
+  alert_cooldown_sec: 5.0

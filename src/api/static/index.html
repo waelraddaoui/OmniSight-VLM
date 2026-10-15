@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMNISIGHT // QUANTUM VIDEO INTELLIGENCE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #030712;
+    --bg-surface: rgba(10, 16, 31, 0.75);
+    --bg-surface-elevated: rgba(16, 25, 48, 0.85);
+    --border-cyan: rgba(0, 240, 255, 0.28);
+    --border-cyan-glow: #00f0ff;
+    --neon-cyan: #00f0ff;
+    --neon-violet: #a855f7;
+    --neon-emerald: #10b981;
+    --neon-rose: #f43f5e;
+    --neon-amber: #f59e0b;
+    --text-primary: #f0fdf4;
+    --text-secondary: #94a3b8;
+    --text-dim: #475569;
+    --font-display: 'Orbitron', -apple-system, sans-serif;
+    --font-ui: 'Rajdhani', -apple-system, sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg-void);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    min-height: 100vh;
+    overflow-x: hidden;
+    letter-spacing: 0.5px;
+    position: relative;
+  }
+
+  /* Scanline CRT overlay */
+  body::before {
+    content: " ";
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 3px, 6px 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  /* Canvas background animation */
+  #bg-canvas {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* App Shell */
+  .app-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* Cyber Header */
+  header {
+    background: rgba(6, 11, 25, 0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-cyan);
+    box-shadow: 0 4px 30px rgba(0, 240, 255, 0.1);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 20%; width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    box-shadow: 0 0 12px var(--neon-cyan);
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-reticle {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotateReticle 12s linear infinite;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+  }
+
+  .logo-reticle::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border: 1px dashed var(--neon-violet);
+    border-radius: 50%;
+    position: absolute;
+  }
+
+  .logo-reticle::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 8px #fff;
+  }
+
+  @keyframes rotateReticle {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  h1.brand-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+  }
+
+  h1.brand-title span {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 15px var(--neon-cyan);
+  }
+
+  .version-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    border-radius: 2px;
+    text-shadow: 0 0 8px var(--neon-cyan);
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  }
+
+  /* Telemetry readouts */
+  .telemetry-ticker {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .tele-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tele-val {
+    color: var(--neon-cyan);
+    font-weight: 700;
+  }
+
+  .audio-toggle-btn {
+    background: transparent;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    color: var(--neon-cyan);
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .audio-toggle-btn:hover {
+    background: rgba(0, 240, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  }
+
+  /* Futuristic Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 8px 20px;
+    color: var(--text-secondary);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .tab-btn:hover::before {
+    left: 100%;
+  }
+
+  .tab-btn:hover {
+    color: #fff;
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+  }
+
+  .tab-btn.active {
+    color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.12);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.35), inset 0 0 10px rgba(0, 240, 255, 0.15);
+  }
+
+  /* Tab View Layouts */
+  .tab-content {
+    display: none;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .tab-content.active {
+    display: flex;
+  }
+
+  /* ===== INVESTIGATE VIEW ===== */
+  .investigate-layout {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Left Panel: Upload + Terminal Chat */
+  .cyber-panel-left {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--border-cyan);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Cyber Cut Corners Component */
+  .cyber-box {
+    position: relative;
+    border: 1px solid var(--border-cyan);
+    background: rgba(10, 16, 31, 0.7);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .cyber-box::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; width: 8px; height: 8px;
+    border-top: 2px solid var(--neon-cyan);
+    border-left: 2px solid var(--neon-cyan);
+  }
+
+  .cyber-box::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; right: -2px; width: 8px; height: 8px;
+    border-bottom: 2px solid var(--neon-cyan);
+    border-right: 2px solid var(--neon-cyan);
+  }
+
+  /* Upload Holo-Pod */
+  .upload-pod {
+    margin: 16px;
+    padding: 24px 16px;
+    border: 1px dashed rgba(0, 240, 255, 0.35);
+    border-radius: 6px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    background: radial-gradient(circle at center, rgba(0, 240, 255, 0.06) 0%, transparent 70%);
+    transition: all 0.3s;
+    overflow: hidden;
+  }
+
+  .upload-pod:hover, .upload-pod.dragover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.25), inset 0 0 20px rgba(0, 240, 255, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .holo-beacon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 12px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  }
+
+  .holo-beacon::before {
+    content: '';
+    position: absolute;
+    width: 66px; height: 66px;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 50%;
+    animation: beaconPulse 2.5s infinite;
+  }
+
+  @keyframes beaconPulse {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  .holo-beacon svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--neon-cyan);
+    filter: drop-shadow(0 0 6px var(--neon-cyan));
+  }
+
+  .upload-pod h3 {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #fff;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+
+  .upload-pod p {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .upload-pod input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Animated scan laser */
+  .scan-laser {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    box-shadow: 0 0 10px var(--neon-cyan);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .upload-pod:hover .scan-laser {
+    opacity: 1;
+    animation: laserScan 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes laserScan {
+    from { top: 0%; }
+    to { top: 100%; }
+  }
+
+  /* Video meta tag */
+  .video-chip-info {
+    display: none;
+    margin: 0 16px 12px;
+    padding: 10px 14px;
+    background: rgba(0, 240, 255, 0.08);
+    border-left: 3px solid var(--neon-cyan);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .video-chip-info.show { display: block; }
+  .video-chip-info .filename { color: #fff; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .video-chip-info .duration { color: var(--neon-cyan); margin-top: 3px; font-size: 11px; }
+
+  /* API Key Module */
+  .api-key-block {
+    margin: 0 16px 12px;
+    padding: 10px 12px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 4px;
+  }
+
+  .api-key-block label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--neon-cyan);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .api-key-block input {
+    width: 100%;
+    background: rgba(3, 7, 18, 0.8);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 2px;
+    color: #fff;
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .api-key-block input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+  }
+
+  /* Neural Terminal / Chat Feed */
+  .terminal-feed {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .log-entry {
+    padding: 12px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.5;
+    position: relative;
+    max-width: 95%;
+  }
+
+  .log-entry.bot {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-left: 3px solid var(--neon-cyan);
+    align-self: flex-start;
+  }
+
+  .log-entry.user {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-right: 3px solid var(--neon-violet);
+    align-self: flex-end;
+    color: #fff;
+  }
+
+  .log-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .log-tag::before {
+    content: '▶';
+    font-size: 8px;
+  }
+
+  .entity-targets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .target-badge {
+    background: rgba(0, 240, 255, 0.12);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-shadow: 0 0 6px var(--neon-cyan);
+  }
+
+  /* Query Console Bar */
+  .query-console {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-cyan);
+    background: rgba(6, 11, 25, 0.9);
+    display: flex;
+    gap: 8px;
+  }
+
+  .query-input {
+    flex: 1;
+    background: rgba(3, 7, 18, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    resize: none;
+    min-height: 42px;
+    max-height: 90px;
+    transition: all 0.2s;
+  }
+
+  .query-input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  }
+
+  .execute-btn {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #030712;
+    background: var(--neon-cyan);
+    border: none;
+    border-radius: 4px;
+    padding: 0 20px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .execute-btn:hover:not(:disabled) {
+    background: #fff;
+    box-shadow: 0 0 25px rgba(0, 240, 255, 1);
+    transform: scale(1.02);
+  }
+
+  .execute-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* ===== RIGHT PANEL: RESULTS & TIMELINE ===== */
+  .cyber-panel-right {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.04) 0%, transparent 60%);
+  }
+
+  /* Hologram Progress Beam */
+  .scan-progress-strip {
+    display: none;
+    padding: 14px 24px;
+    background: rgba(10, 16, 31, 0.85);
+    border-bottom: 1px solid var(--border-cyan);
+    backdrop-filter: blur(10px);
+  }
+
+  .scan-progress-strip.show { display: block; }
+
+  .progress-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+  }
+
+  .progress-meta-row .status-label {
+    color: var(--neon-cyan);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .reactor-rail {
+    height: 8px;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .reactor-core-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon-violet), var(--neon-cyan), #fff);
+    box-shadow: 0 0 15px var(--neon-cyan);
+    transition: width 0.3s ease;
+    border-radius: 4px;
+  }
+
+  .progress-log-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+
+  /* Quantum Timeline */
+  .hologram-timeline {
+    display: none;
+    padding: 16px 24px;
+    background: rgba(10, 16, 31, 0.9);
+    border-bottom: 1px solid var(--border-cyan);
+  }
+
+  .hologram-timeline.show { display: block; }
+
+  .timeline-header-text {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .timeline-laser-track {
+    height: 34px;
+    background: rgba(3, 7, 18, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 4px;
+    position: relative;
+    overflow: visible;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+  }
+
+  .timeline-laser-track::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; width: 100%; height: 1px;
+    background: rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+  }
+
+  .timeline-marker-node {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 28px;
+    z-index: 2;
+  }
+
+  .timeline-marker-node:hover {
+    transform: scaleY(1.15) translateY(-2px);
+    z-index: 10;
+    filter: brightness(1.2);
+  }
+
+  .timeline-marker-node.rank-1 {
+    background: linear-gradient(180deg, #10b981, #059669);
+    border: 1px solid #34d399;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+  }
+
+  .timeline-marker-node.rank-2 {
+    background: linear-gradient(180deg, #00f0ff, #0284c7);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+  }
+
+  .timeline-marker-node.rank-3 {
+    background: linear-gradient(180deg, #f59e0b, #d97706);
+    border: 1px solid #fbbf24;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+  }
+
+  .timeline-marker-node.rank-other {
+    background: linear-gradient(180deg, #64748b, #475569);
+    border: 1px solid #94a3b8;
+  }
+
+  .timeline-timestamps {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* Results Stream Container */
+  .intel-results-viewport {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  /* Empty State Hologram */
+  .empty-telemetry-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    text-align: center;
+    gap: 16px;
+  }
+
+  .holo-radar-ring {
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .holo-radar-ring::before {
+    content: '';
+    position: absolute;
+    width: 70px; height: 70px;
+    border: 1px dashed rgba(168, 85, 247, 0.35);
+    border-radius: 50%;
+    animation: rotateReticle 15s linear infinite reverse;
+  }
+
+  .holo-radar-sweep {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 0; left: 0;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.4), transparent);
+    transform-origin: 100% 100%;
+    animation: radarSweep 3s linear infinite;
+    border-radius: 100% 0 0 0;
+  }
+
+  @keyframes radarSweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .empty-telemetry-state h3 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .empty-telemetry-state p {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    max-width: 360px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  /* Result Intel Cards */
+  .intel-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .intel-card {
+    background: rgba(10, 16, 31, 0.75);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .intel-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+  }
+
+  .intel-card.rank-1::before { background: var(--neon-emerald); box-shadow: 0 0 12px var(--neon-emerald); }
+  .intel-card.rank-2::before { background: var(--neon-cyan); box-shadow: 0 0 12px var(--neon-cyan); }
+  .intel-card.rank-3::before { background: var(--neon-amber); box-shadow: 0 0 12px var(--neon-amber); }
+
+  .intel-card:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 8px 30px rgba(0, 240, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .intel-card-header {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  .card-rank-badge {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-meta-content {
+    flex: 1;
+    margin: 0 16px;
+  }
+
+  .card-timestamp-range {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+
+  .card-explanation-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .score-gauge {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 900;
+    padding: 4px 12px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .score-gauge.high {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid var(--neon-emerald);
+    color: var(--neon-emerald);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  }
+
+  .score-gauge.mid {
+    background: rgba(0, 240, 255, 0.15);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .score-gauge.low {
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+  .tactical-hud-toggle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(0, 240, 255, 0.15);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+  .tactical-hud-toggle:hover {
+    background: rgba(0, 240, 255, 0.25);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.5);
+  }
+  .tactical-hud-toggle:not(.active) {
+    background: rgba(148, 163, 184, 0.1);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: var(--text-secondary);
+    box-shadow: none;
+  }
+  .spatial-telemetry-strip {
+    margin: 0 20px 10px;
+    padding: 8px 12px;
+    background: rgba(0, 240, 255, 0.05);
+    border-left: 2px solid var(--neon-cyan);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary);
+  }
+  .spatial-tag {
+    color: var(--neon-cyan);
+    font-weight: 700;
+  }
+  .spatial-dist {
+    color: var(--neon-emerald);
+  }
+  .spatial-bbox {
+    color: var(--neon-amber);
+  }
+
+  /* Futuristic Video Player Enclosure */
+  .tactical-viewport {
+    padding: 14px 20px;
+    position: relative;
+    background: #000;
+  }
+
+  .tactical-hud-overlay {
+    position: absolute;
+    top: 20px; left: 26px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--neon-cyan);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 8px;
+    border-radius: 2px;
+    border-left: 2px solid var(--neon-cyan);
+    pointer-events: none;
+    z-index: 5;
+    letter-spacing: 1px;
+  }
+
+  .clip-video-player {
+    width: 100%;
+    max-height: 360px;
+    border-radius: 4px;
+    background: #000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    display: block;
+    outline: none;
+  }
+
+  .card-detected-entities {
+    padding: 10px 20px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-top: 1px solid rgba(0, 240, 255, 0.08);
+  }
+
+  .entity-chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    color: var(--text-secondary);
+    padding: 3px 10px;
+    border-radius: 2px;
+  }
+
+  /* ===== LIVE STREAM TAB ===== */
+  .live-stream-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .live-canvas-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #stream-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
+  }
+
+  .hud-crosshair-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.6) 100%),
+      linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  .live-status-pill {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(6, 11, 25, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-cyan);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+  }
+
+  .status-beacon-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--neon-rose);
+  }
+
+  .status-beacon-dot.connected {
+    background: var(--neon-emerald);
+    box-shadow: 0 0 10px var(--neon-emerald);
+    animation: beaconPulse 1.5s infinite;
+  }
+
+  .live-sidebar-panel {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    border-left: 1px solid var(--border-cyan);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-section-title {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-cyan);
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+  }
+
+  .vocab-control-box {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-cyan);
+  }
+
+  .vocab-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .vocab-pill-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    border-radius: 2px;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #fff;
+  }
+
+  .vocab-pill-tag button {
+    background: none;
+    border: none;
+    color: var(--neon-rose);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  .vocab-add-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .vocab-input-field {
+    flex: 1;
+    background: rgba(3, 7, 18, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 2px;
+    color: #fff;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    outline: none;
+  }
+
+  .vocab-input-field:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  }
+
+  .vocab-add-button {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    color: #030712;
+    background: var(--neon-cyan);
+    border: none;
+    border-radius: 2px;
+    padding: 0 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .incident-log-stream {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .incident-log-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .incident-log-item .inc-title {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .inc-HIGH { color: var(--neon-rose); text-shadow: 0 0 8px rgba(244, 63, 94, 0.5); }
+  .inc-LOW { color: var(--neon-amber); }
+  .inc-INFO { color: var(--neon-cyan); }
+
+  .incident-log-item .inc-desc { color: var(--text-secondary); }
+  .incident-log-item .inc-clock { color: var(--text-dim); font-size: 10px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.8); }
+  ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+</style>
+</head>
+<body>
+
+<!-- Animated background grid -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="app-container">
+  <!-- Cyber Header -->
+  <header>
+    <div class="brand-group">
+      <a href="#" class="brand-logo">
+        <div class="logo-reticle"></div>
+        <h1 class="brand-title">OMNI<span>SIGHT</span></h1>
+      </a>
+      <span class="version-tag">V2.4 // QUANTUM-VISION</span>
+    </div>
+
+    <!-- Live Telemetry Readout -->
+    <div class="telemetry-ticker">
+      <div class="tele-item">
+        <span>CORE:</span>
+        <span class="tele-val">ONLINE</span>
+      </div>
+      <div class="tele-item">
+        <span>MODEL:</span>
+        <span class="tele-val">GEMINI-3.5-FLASH</span>
+      </div>
+      <div class="tele-item">
+        <span>DETECTOR:</span>
+        <span class="tele-val">YOLO-WORLD</span>
+      </div>
+      <button class="audio-toggle-btn" id="audioToggleBtn" onclick="toggleAudioFeedback()">
+        AUDIO: <span id="audioState">ON</span>
+      </button>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('investigate', event)">INVESTIGATE</button>
+      <button class="tab-btn" onclick="switchTab('stream', event)">TACTICAL STREAM</button>
+    </div>
+  </header>
+
+  <!-- ==================== INVESTIGATE TAB ==================== -->
+  <div id="tab-investigate" class="tab-content active">
+    <div class="investigate-layout">
+      <!-- Left Panel: Feed + Upload + Query -->
+      <div class="cyber-panel-left">
+        <!-- Hologram Upload Pod -->
+        <div class="upload-pod" id="uploadZone">
+          <div class="scan-laser"></div>
+          <div class="holo-beacon">
+            <svg viewBox="0 0 24 24">
+              <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            </svg>
+          </div>
+          <h3>DEPLOY SURVEILLANCE FEED</h3>
+          <p>DROP MP4 / AVI / MOV TO COMMENCE QUANTUM SCAN</p>
+          <input type="file" id="videoFileInput" accept="video/*">
+        </div>
+
+        <!-- Video Metadata Chip -->
+        <div class="video-chip-info" id="uploadInfo">
+          <div class="filename" id="uploadFilename">FEED_LOADED.mp4</div>
+          <div class="duration" id="uploadDuration">DURATION: 00:00</div>
+        </div>
+
+        <!-- API Key Module -->
+        <div class="api-key-block">
+          <label>
+            <span>GEMINI API KEY</span>
+            <span style="color:var(--neon-emerald)">AUTHENTICATED</span>
+          </label>
+          <input id="apiKeyInput" type="password" placeholder="Enter Gemini API key (or leave empty if set in .env)">
+        </div>
+
+        <!-- Neural Terminal / Conversation Feed -->
+        <div class="terminal-feed" id="chatArea">
+          <div class="log-entry bot">
+            <div class="log-tag">QUANTUM INTEL INITIALIZED</div>
+            Neural video grounding ready. Upload any surveillance footage and prompt in natural language.<br><br>
+            <em>"find when a phone was used in this video"</em><br>
+            <em>"find the microsoft logo"</em><br>
+            <em>"detect worker entering restricted robotics bay"</em>
+          </div>
+        </div>
+
+        <!-- Query Console Bar -->
+        <div class="query-console">
+          <textarea class="query-input" id="queryInput" placeholder="ENTER NEURAL QUERY >_" rows="1"></textarea>
+          <button class="execute-btn" id="sendBtn" onclick="submitQuery()" disabled>
+            <span>ANALYZE</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-7.85-1.42 1.42L16.86 11H5v2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Panel: Results & Timeline -->
+      <div class="cyber-panel-right">
+        <!-- Progress Beam -->
+        <div class="scan-progress-strip" id="progressSection">
+          <div class="progress-meta-row">
+            <span class="status-label" id="progressLabel">SCANNING QUANTUM FRAMES...</span>
+            <span id="progressPct" style="color:var(--neon-cyan); font-weight:700;">0%</span>
+          </div>
+          <div class="reactor-rail">
+            <div class="reactor-core-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-log-text" id="progressMsg">INITIALIZING...</div>
+        </div>
+
+        <!-- Hologram Timeline -->
+        <div class="hologram-timeline" id="timelineSection">
+          <div class="timeline-header-text">
+            <span>TEMPORAL EVENT SPECTRAL RAIL</span>
+            <span style="color:var(--text-secondary)">CLICK NODE TO PREVIEW INTERVAL</span>
+          </div>
+          <div class="timeline-laser-track" id="timelineTrack"></div>
+          <div class="timeline-timestamps" id="timelineLabels"></div>
+        </div>
+
+        <!-- Results Viewport -->
+        <div class="intel-results-viewport" id="resultsArea">
+          <div class="empty-telemetry-state">
+            <div class="holo-radar-ring">
+              <div class="holo-radar-sweep"></div>
+            </div>
+            <h3>SURVEILLANCE RADAR STANDBY</h3>
+            <p>Awaiting query execution. Once initiated, all grounded moments will materialize with frame-accurate video extractions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TACTICAL STREAM TAB ==================== -->
+  <div id="tab-stream" class="tab-content">
+    <div class="live-stream-layout">
+      <!-- Main Live Video Canvas -->
+      <div class="live-canvas-stage">
+        <canvas id="stream-canvas"></canvas>
+        <div class="hud-crosshair-overlay"></div>
+        <div class="live-status-pill">
+          <div class="status-beacon-dot" id="statusDot"></div>
+          <span id="statusText">CONNECTING</span>
+        </div>
+      </div>
+
+      <!-- Tactical Sidebar -->
+      <div class="live-sidebar-panel">
+        <div class="sidebar-section-title">DETECTION VOCABULARY MATRIX</div>
+        <div class="vocab-control-box">
+          <div class="vocab-chips-container" id="vocabPills"></div>
+          <div class="vocab-add-group">
+            <input class="vocab-input-field" id="vocabInput" placeholder="TARGET CLASS..." onkeydown="if(event.key==='Enter') addVocabClass()">
+            <button class="vocab-add-button" onclick="addVocabClass()">LOCK</button>
+          </div>
+        </div>
+
+        <div class="sidebar-section-title">INCIDENT TELEMETRY FEED</div>
+        <div class="incident-log-stream" id="incidentsList">
+          <div style="padding: 24px 16px; color: var(--text-dim); text-align: center; font-family: var(--font-mono);">
+            // NO ACTIVE BREACHES DETECTED
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// FUTURISTIC AUDIO SYNTHESIZER (Pure Web Audio API)
+// ============================================================
+let audioCtx = null;
+let soundEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playCyberChirp(type = 'click') {
+  if (!soundEnabled) return;
+  try {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    if (type === 'click') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } else if (type === 'success') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(880, now + 0.08);
+      osc.frequency.setValueAtTime(1320, now + 0.16);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    } else if (type === 'scan') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.linearRampToValueAtTime(1600, now + 0.1);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    }
+  } catch (e) {}
+}
+
+function toggleAudioFeedback() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('audioState').textContent = soundEnabled ? 'ON' : 'OFF';
+  if (soundEnabled) playCyberChirp('success');
+}
+
+// ============================================================
+// ANIMATED SCI-FI BACKGROUND CANVAS
+// ============================================================
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let particles = [];
+
+function resizeBg() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeBg);
+resizeBg();
+
+for (let i = 0; i < 45; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: (Math.random() - 0.5) * 0.4,
+    size: Math.random() * 2 + 0.5,
+    alpha: Math.random() * 0.5 + 0.2,
+  });
+}
+
+function renderBg() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  // Draw perspective grid horizon
+  bgCtx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
+  bgCtx.lineWidth = 1;
+  const step = 60;
+  for (let x = 0; x < bgCanvas.width; x += step) {
+    bgCtx.beginPath();
+    bgCtx.moveTo(x, 0);
+    bgCtx.lineTo(x, bgCanvas.height);
+    bgCtx.stroke();
+  }
+  for (let y = 0; y < bgCanvas.height; y += step) {
+    bgCtx.beginPath();
+    bgCtx.moveTo(0, y);
+    bgCtx.lineTo(bgCanvas.width, y);
+    bgCtx.stroke();
+  }
+
+  // Draw cyber particles & constellations
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.x < 0) p.x = bgCanvas.width;
+    if (p.x > bgCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = bgCanvas.height;
+    if (p.y > bgCanvas.height) p.y = 0;
+
+    bgCtx.fillStyle = `rgba(0, 240, 255, ${p.alpha})`;
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    bgCtx.fill();
+
+    for (let j = i + 1; j < particles.length; j++) {
+      const p2 = particles[j];
+      const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+      if (dist < 130) {
+        bgCtx.strokeStyle = `rgba(0, 240, 255, ${0.1 * (1 - dist / 130)})`;
+        bgCtx.beginPath();
+        bgCtx.moveTo(p.x, p.y);
+        bgCtx.lineTo(p2.x, p2.y);
+        bgCtx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(renderBg);
+}
+renderBg();
+
+// ============================================================
+// STATE
+// ============================================================
+let currentJobId = null;
+let progressWs = null;
+let streamWs = null;
+let vocabulary = ['worker', 'helmet', 'cart', 'person'];
+
+// Load API key from localStorage or keep default
+const apiKeyEl = document.getElementById('apiKeyInput');
+if (localStorage.getItem('omnisight_gemini_key')) {
+  apiKeyEl.value = localStorage.getItem('omnisight_gemini_key');
+}
+apiKeyEl.addEventListener('input', () => {
+  localStorage.setItem('omnisight_gemini_key', apiKeyEl.value.trim());
+});
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(name, evt) {
+  playCyberChirp('click');
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  if (evt && evt.target) evt.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'stream' && !streamWs) initStreamWs();
+}
+
+// ============================================================
+// VIDEO UPLOAD
+// ============================================================
+const uploadInput = document.getElementById('videoFileInput');
+const uploadZone = document.getElementById('uploadZone');
+const sendBtn = document.getElementById('sendBtn');
+
+uploadInput.addEventListener('change', () => {
+  if (uploadInput.files.length > 0) uploadVideo(uploadInput.files[0]);
+});
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('video/')) uploadVideo(file);
+});
+
+async function uploadVideo(file) {
+  playCyberChirp('scan');
+  sendBtn.disabled = true;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    currentJobId = data.job_id;
+
+    document.getElementById('uploadFilename').textContent = data.filename;
+    document.getElementById('uploadDuration').textContent = `FEED LENGTH: ${formatDuration(data.duration_sec)}`;
+    document.getElementById('uploadInfo').classList.add('show');
+    sendBtn.disabled = false;
+
+    playCyberChirp('success');
+    addMessage('bot', `SURVEILLANCE FEED LOCKED: <strong>${data.filename}</strong> (${formatDuration(data.duration_sec)})<br>Enter neural prompt to begin temporal interval extraction.`);
+  } catch (e) {
+    addMessage('bot', 'DEPLOYMENT ERROR: Feed ingestion failed. Verify API connection.');
+  }
+}
+
+// ============================================================
+// QUERY SUBMISSION
+// ============================================================
+async function submitQuery() {
+  playCyberChirp('click');
+  const query = document.getElementById('queryInput').value.trim();
+  const apiKey = apiKeyEl.value.trim();
+  if (apiKey) localStorage.setItem('omnisight_gemini_key', apiKey);
+  if (!query || !currentJobId) return;
+
+  document.getElementById('queryInput').value = '';
+  sendBtn.disabled = true;
+  addMessage('user', query);
+
+  connectProgressWs(currentJobId);
+
+  document.getElementById('progressSection').classList.add('show');
+  updateProgress(0, 'SYNTHESIZING NEURAL PROMPT...');
+
+  try {
+    const res = await fetch('/api/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ job_id: currentJobId, query, gemini_api_key: apiKey }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      addMessage('bot', `ERROR: ${data.error}`);
+      sendBtn.disabled = false;
+      return;
+    }
+
+    const targetPills = (data.detection_targets || []).map(t => `<span class="target-badge">${t}</span>`).join('');
+    addMessage('bot',
+      `<div class="log-tag">QUANTUM TARGET MATRIX</div>
+      ${data.human_summary}<br>
+      <div class="entity-targets">${targetPills}</div>`
+    );
+  } catch (e) {
+    addMessage('bot', 'INFERENCE ERROR: Query execution dropped.');
+    sendBtn.disabled = false;
+  }
+}
+
+// ============================================================
+// WEBSOCKET PROGRESS
+// ============================================================
+function connectProgressWs(jobId) {
+  if (progressWs) progressWs.close();
+  progressWs = new WebSocket(`ws://${location.host}/ws/progress/${jobId}`);
+
+  progressWs.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'progress') {
+      if (msg.progress >= 0) updateProgress(msg.progress, msg.message);
+      if (msg.results) {
+        playCyberChirp('success');
+        showResults(msg.results);
+      }
+    }
+  };
+}
+
+function updateProgress(pct, message) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = Math.round(pct) + '%';
+  document.getElementById('progressMsg').textContent = message.toUpperCase();
+  if (pct >= 100) {
+    document.getElementById('progressLabel').textContent = 'QUANTUM SCAN COMPLETED';
+    sendBtn.disabled = false;
+  }
+}
+
+// ============================================================
+// INTEL RESULTS RENDERING
+// ============================================================
+function showResults(results) {
+  const clips = results.clips || [];
+  const duration = results.video_duration_sec || 1;
+
+  if (clips.length > 0) {
+    renderTimeline(clips, duration);
+    document.getElementById('timelineSection').classList.add('show');
+  }
+
+  const area = document.getElementById('resultsArea');
+  if (clips.length === 0) {
+    area.innerHTML = `
+      <div class="empty-telemetry-state">
+        <div class="holo-radar-ring"></div>
+        <h3>NO CORRELATED INTERVALS FOUND</h3>
+        <p>No target matches exceeded detection thresholds. Try refining your query phrasing.</p>
+      </div>`;
+    addMessage('bot', `SCAN FINISHED IN ${results.scan_duration_sec}s. No temporal matches grounded.`);
+    return;
+  }
+
+  addMessage('bot',
+    `QUANTUM EXTRACTION COMPLETE: <strong>${clips.length} TARGET MOMENT(S)</strong> ISOLATED IN <strong>${results.scan_duration_sec}s</strong>.`
+  );
+
+  area.innerHTML = `
+    <div class="dossier-actions-bar" style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 12px 18px; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 6px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);">
+      <div style="font-family: var(--font-mono); font-size: 12px; color: var(--neon-cyan);">
+        ⚡ <strong>FORENSIC ATTESTATION:</strong> ${clips.length} Evidence Clip(s) // Cryptographic Chain-of-Custody Active
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="execute-btn" style="padding: 6px 14px; font-size: 11px; margin: 0;" onclick="downloadForensicDossier('pdf')">
+          📑 EXPORT FORENSIC DOSSIER (PDF)
+        </button>
+        <button class="tactical-hud-toggle active" style="margin: 0; padding: 6px 12px;" onclick="downloadForensicDossier('json')">
+          🗄️ SIEM JSON
+        </button>
+      </div>
+    </div>
+    <div class="intel-grid" id="intelGrid"></div>`;
+  const grid = document.getElementById('intelGrid');
+
+  clips.forEach((clip, i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+    const score = Math.round(clip.score * 100);
+    const scoreClass = score >= 75 ? 'high' : score >= 45 ? 'mid' : 'low';
+
+    const entityChips = (clip.detected_labels || []).map(l => `<div class="entity-chip">// ${l.toUpperCase()}</div>`).join('');
+    const rawVideo = clip.clip_filename;
+    const trackedVideo = clip.tracked_clip_filename || clip.clip_filename;
+    const defaultVideo = trackedVideo;
+
+    const spatialCoordText = (clip.box_2d && clip.box_2d.length === 4) 
+      ? `// COORDS: [Y:${clip.box_2d[0]}, X:${clip.box_2d[1]}]` 
+      : '// SPATIAL: LOCKED';
+
+    const card = document.createElement('div');
+    card.className = `intel-card ${rankClass}`;
+    card.id = `card-rank-${rank}`;
+    card.innerHTML = `
+      <div class="intel-card-header">
+        <div class="card-rank-badge">
+          <span>// LOC #${rank}</span>
+        </div>
+        <div class="card-meta-content">
+          <div class="card-timestamp-range">${formatDuration(clip.peak_sec)} — ${formatDuration(clip.end_sec)}</div>
+          <div class="card-explanation-text">${clip.explanation}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="tactical-hud-toggle ${clip.tracked_clip_filename ? 'active' : ''}" 
+                  onclick="toggleFeedVideo(this, '${rawVideo}', '${trackedVideo}')">
+            ${clip.tracked_clip_filename ? '🎯 TACTICAL HUD: ON' : '📹 RAW FEED'}
+          </button>
+          <div class="score-gauge ${scoreClass}">${score}% MATCH</div>
+        </div>
+      </div>
+      <div class="spatial-telemetry-strip">
+        <span class="spatial-tag">📍 SPATIAL MOTION:</span>
+        <span>${clip.trajectory_desc || 'TARGET TRACKED ACROSS FRAME'}</span>
+        <span class="spatial-dist">// DISPLACEMENT: ${clip.trajectory_length_px ? clip.trajectory_length_px + 'px' : 'ACTIVE'}</span>
+        <span class="spatial-bbox">${spatialCoordText}</span>
+      </div>
+      <div class="tactical-viewport">
+        <div class="tactical-hud-overlay">FEED_EXTRACT // ${formatDuration(clip.start_sec)} - ${formatDuration(clip.end_sec)}</div>
+        <video class="clip-video-player" controls preload="metadata">
+          <source src="/api/clips/${defaultVideo}" type="video/mp4">
+        </video>
+      </div>
+      <div class="card-detected-entities">${entityChips}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function toggleFeedVideo(btn, rawFile, trackedFile) {
+  playCyberChirp('click');
+  const card = btn.closest('.intel-card');
+  const video = card.querySelector('.clip-video-player');
+  const isTracked = btn.classList.contains('active');
+  if (isTracked) {
+    btn.classList.remove('active');
+    btn.textContent = '📹 RAW FEED';
+    video.src = '/api/clips/' + rawFile;
+  } else {
+    btn.classList.add('active');
+    btn.textContent = '🎯 TACTICAL HUD: ON';
+    video.src = '/api/clips/' + trackedFile;
+  }
+  video.play();
+}
+
+function downloadForensicDossier(format) {
+  playCyberChirp('success');
+  if (!currentJobId) {
+    addMessage('bot', 'SECURITY WARNING: No active intelligence session selected.');
+    return;
+  }
+  const url = `/api/dossier/${currentJobId}/${format}`;
+  addMessage('bot', `COMPILING FORENSIC DOSSIER [${format.toUpperCase()}] // ATTESTING EVIDENTIARY HASH...`);
+  window.open(url, '_blank');
+}
+
+function renderTimeline(clips, duration) {
+  const track = document.getElementById('timelineTrack');
+  const labels = document.getElementById('timelineLabels');
+  track.innerHTML = '';
+  labels.innerHTML = '';
+
+  clips.forEach((clip, i) => {
+    const left = (clip.start_sec / duration) * 100;
+    const width = Math.max(1.5, ((clip.end_sec - clip.start_sec) / duration) * 100);
+    const rankClass = i < 3 ? `rank-${i + 1}` : 'rank-other';
+    const el = document.createElement('div');
+    el.className = `timeline-marker-node ${rankClass}`;
+    el.style.left = left + '%';
+    el.style.width = width + '%';
+    el.title = `LOC #${i + 1}: ${formatDuration(clip.start_sec)}–${formatDuration(clip.end_sec)} (${Math.round(clip.score * 100)}%)`;
+    el.textContent = `#${i + 1}`;
+    el.onclick = () => {
+      playCyberChirp('click');
+      const targetCard = document.getElementById(`card-rank-${i + 1}`);
+      if (targetCard) targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    track.appendChild(el);
+  });
+
+  labels.innerHTML = `<span>00:00</span><span>${formatDuration(duration / 2)}</span><span>${formatDuration(duration)}</span>`;
+}
+
+// ============================================================
+// CHAT LOG HELPER
+// ============================================================
+function addMessage(type, html) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.innerHTML = html;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function formatDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// ============================================================
+// TACTICAL STREAM TAB
+// ============================================================
+function initStreamWs() {
+  const canvas = document.getElementById('stream-canvas');
+  const ctx = canvas.getContext('2d');
+  const dot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+
+  streamWs = new WebSocket(`ws://${location.host}/ws/stream`);
+  streamWs.binaryType = 'arraybuffer';
+
+  streamWs.onopen = () => {
+    dot.classList.add('connected');
+    statusText.textContent = 'ONLINE // TELEMETRY ACTIVE';
+  };
+  streamWs.onclose = () => {
+    dot.classList.remove('connected');
+    statusText.textContent = 'LINK SEVERED // RECONNECTING';
+    setTimeout(initStreamWs, 2000);
+  };
+  streamWs.onerror = () => {
+    dot.classList.remove('connected');
+    statusText.textContent = 'COMM ERROR';
+  };
+
+  streamWs.onmessage = (evt) => {
+    if (typeof evt.data === 'string') {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === 'incident') addIncident(msg.data);
+      return;
+    }
+    const blob = new Blob([evt.data], { type: 'image/jpeg' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  };
+
+  fetch('/api/vocabulary').then(r => r.json()).then(d => {
+    vocabulary = d.vocabulary;
+    renderVocab();
+  });
+}
+
+function addIncident(inc) {
+  playCyberChirp('scan');
+  const list = document.getElementById('incidentsList');
+  if (list.querySelector('div[style]')) list.innerHTML = '';
+  const el = document.createElement('div');
+  el.className = 'incident-log-item';
+  el.innerHTML = `
+    <div class="inc-title inc-${inc.severity}">// ${inc.event_type} [${inc.severity}]</div>
+    <div class="inc-desc">${inc.description}</div>
+    <div class="inc-clock">UTC: ${inc.timestamp}</div>
+  `;
+  list.prepend(el);
+  if (list.children.length > 25) list.lastChild.remove();
+}
+
+function renderVocab() {
+  const container = document.getElementById('vocabPills');
+  container.innerHTML = vocabulary.map(v => `
+    <div class="vocab-pill-tag">
+      <span>// ${v.toUpperCase()}</span>
+      <button onclick="removeVocabClass('${v}')">&times;</button>
+    </div>`).join('');
+}
+
+function addVocabClass() {
+  playCyberChirp('click');
+  const input = document.getElementById('vocabInput');
+  const val = input.value.trim().toLowerCase();
+  if (!val || vocabulary.includes(val)) { input.value = ''; return; }
+  vocabulary.push(val);
+  input.value = '';
+  syncVocabulary();
+}
+
+function removeVocabClass(cls) {
+  playCyberChirp('click');
+  vocabulary = vocabulary.filter(v => v !== cls);
+  syncVocabulary();
+}
+
+function syncVocabulary() {
+  renderVocab();
+  fetch('/api/vocabulary', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vocabulary }),
+  });
+}
+
+document.getElementById('queryInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuery(); }
+});
+</script>
+</body>
+</html>

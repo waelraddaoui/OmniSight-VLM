@@ -1,0 +1,23 @@
+# Computer Vision & Deep Learning
+ultralytics>=8.2.0
+supervision>=0.22.0
+opencv-python>=4.9.0
+numpy>=1.24.0
+pillow>=10.0.0
+
+# Multimodal / Vision-Language Models
+transformers>=4.45.0
+accelerate>=0.30.0
+qwen-vl-utils>=0.0.8
+
+# Engineering, Schemas & Config
+pydantic>=2.7.0
+pyyaml>=6.0.1
+rich>=13.7.0
+
+# API & Streaming
+fastapi>=0.111.0
+uvicorn>=0.30.0
+
+# Testing & Quality
+pytest>=8.2.0

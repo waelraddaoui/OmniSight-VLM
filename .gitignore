@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# PyTorch / Weights & Models
+*.pt
+*.pth
+*.onnx
+*.engine
+*.bin
+weights/
+checkpoints/
+
+# Data & Video Samples
+data/raw/
+data/processed/
+*.mp4
+*.avi
+*.mkv
+
+# Logs & Monitoring
+logs/
+wandb/
+runs/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Large binary packages
+*.whl
+
+# Outputs & Uploads
+uploads/
+results/
+
+# OS
+.DS_Store
+Thumbs.db
