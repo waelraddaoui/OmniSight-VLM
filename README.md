@@ -9,6 +9,12 @@
 [![ByteTrack](https://img.shields.io/badge/Tracker-ByteTrack-orange.svg)](https://github.com/ifzhang/ByteTrack)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<br><br>
+
+<img src="assets/omnisight_vlm_banner.jpg" alt="OmniSight-VLM Command Center" width="100%">
+
+<br><br>
+
 *An end-to-end computer vision platform bridging open-vocabulary zero-shot perception with temporal multi-object tracking, polygon spatial analytics, and asynchronous Vision-Language reasoning.*
 
 </div>
